@@ -7,58 +7,49 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    
     <style>
-        :root {
-            --bg: #0f101a; --card-bg: rgba(255, 255, 255, 0.03);
-            --blue: #00d2ff; --purple: #a29bfe; --orange: #ff9f43;
-            --danger: #ff4b5c; --green: #55efc4; --yellow-neon: #fff200; --text-gray: #94a3b8;
-        }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .top-info-bar { width: 100%; background: rgba(255,255,255,0.02); padding: 8px 0; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: center; gap: 20px; font-weight: 600; }
-        .live-time { color: var(--blue); font-family: monospace; font-size: 1.1rem; }
-        .nav-bar { width: 100%; background: rgba(0,0,0,0.3); padding: 15px 0; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        :root { --bg: #0f101a; --card-bg: rgba(255, 255, 255, 0.03); --blue: #00d2ff; --purple: #a29bfe; --orange: #ff9f43; --danger: #ff4b5c; --green: #55efc4; --yellow: #fff200; --text-gray: #94a3b8; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; align-items: center; }
+        .top-info-bar { width: 100%; background: rgba(255,255,255,0.02); padding: 10px 0; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; }
+        .live-time { color: var(--blue); font-weight: bold; }
+        .nav-bar { width: 100%; background: rgba(0,0,0,0.4); padding: 15px 0; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .nav-link { padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: 800; color: var(--text-gray); transition: 0.3s; font-size: 0.85rem; }
         .nav-link.active-lunch { background: var(--blue); color: black; }
         .nav-link.active-leaves { background: var(--orange); color: black; }
         .nav-link.active-task { background: var(--purple); color: black; }
-        .admin-controls { display: none; width: 100%; background: rgba(255, 75, 92, 0.15); padding: 10px 0; text-align: center; border-bottom: 1px solid var(--danger); position: sticky; top: 65px; z-index: 99; }
+        .admin-controls { display: none; width: 100%; background: rgba(255, 75, 92, 0.1); padding: 12px 0; text-align: center; border-bottom: 1px solid var(--danger); }
         .admin-mode .admin-controls { display: block; }
-        .admin-btn { background: white; border: none; padding: 6px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 0 5px; color: black; font-size: 0.8rem; }
-        .container { width: 95%; max-width: 1300px; display: none; padding: 15px 0; }
+        .admin-btn { background: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 0 5px; font-size: 0.8rem; }
+        .container { width: 95%; max-width: 1200px; display: none; padding: 30px 0; margin: 0 auto; align-items: center; text-align: center; }
         .container.active { display: flex; flex-direction: column; }
-        .btn-book { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; margin-top: auto; }
-        .lunch-btn { background: rgba(0, 210, 255, 0.15); color: var(--blue); border: 1px solid var(--blue); }
-        .leaves-btn { background: rgba(255, 159, 67, 0.15); color: var(--orange); border: 1px solid var(--orange); }
-        .table-wrapper { background: #161b22; border-radius: 22px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        table { width: 100%; border-collapse: collapse; text-align: center; }
-        th { background: rgba(255,255,255,0.05); padding: 18px; color: white; font-size: 0.9rem; text-transform: uppercase; }
-        td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .task-badge { padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; display: inline-block; min-width: 120px; }
-        .badge-esc { background: rgba(0, 210, 255, 0.1); color: var(--blue); border: 1px solid rgba(0, 210, 255, 0.4); }
-        .badge-feed { background: rgba(162, 155, 254, 0.1); color: var(--purple); border: 1px solid rgba(162, 155, 254, 0.4); }
-        .badge-back { background: rgba(255, 242, 0, 0.15); color: var(--yellow-neon); border: 1px solid rgba(255, 242, 0, 0.5); text-shadow: 0 0 8px rgba(255, 242, 0, 0.4); }
-        tr.today-row { background: rgba(255, 255, 255, 0.05) !important; }
-        tr.today-row td:first-child { border-right: 5px solid var(--green); }
-        tr.today-row b { color: var(--green) !important; font-size: 1.1rem; }
-        .emp-section { background: rgba(255, 255, 255, 0.02); padding: 20px; border-radius: 25px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
-        .emp-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .emp-item { padding: 10px 20px; border-radius: 15px; background: rgba(255,255,255,0.05); cursor: pointer; color: var(--text-gray); font-weight: 700; min-width: 100px; text-align: center; }
-        .emp-item.sel-lunch { background: var(--blue); color: black; }
-        .emp-item.sel-leaves { background: var(--orange); color: black; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: var(--card-bg); border-radius: 22px; padding: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; min-height: 180px; }
-        .user-badge { background: white; color: black; padding: 6px; border-radius: 10px; margin: 4px 0; font-weight: 800; font-size: 0.9rem; position: relative; }
-        .remove-x { color: var(--danger); margin-left: 8px; cursor: pointer; display: none; }
+        .emp-list-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 35px; width: 100%; }
+        .user-badge { background: #fff; color: #000; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 2px solid transparent; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 100%; justify-content: center; }
+        .card { background: var(--card-bg); border-radius: 22px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; min-height: 200px; align-items: center; justify-content: space-between; }
+        .reserve-btn { border: none; padding: 12px 25px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: 0.3s; width: 90%; margin-top: 15px; }
+        .btn-lunch { background: linear-gradient(135deg, var(--blue), #00a8cc); color: black; }
+        .btn-leaves { background: linear-gradient(135deg, var(--orange), #e67e22); color: black; }
+        .table-wrapper { width: 100%; background: #161b22; border-radius: 20px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.08); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: rgba(255,255,255,0.03); padding: 18px; font-size: 0.9rem; color: var(--text-gray); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .task-badge { padding: 7px 14px; border-radius: 9px; font-weight: 700; font-size: 0.8rem; }
+        .badge-esc { background: rgba(0, 210, 255, 0.1); color: var(--blue); }
+        .badge-feed { background: rgba(162, 155, 254, 0.1); color: var(--purple); }
+        .badge-back { background: rgba(255, 242, 0, 0.1); color: var(--yellow); }
+        tr.today-row { background: rgba(85, 239, 196, 0.15) !important; border-left: 5px solid var(--green); }
+
+        /* التوقيع المعدل */
+        .footer-signature { margin-top: auto; padding: 60px 0; width: 100%; text-align: center; border-top: 1px solid rgba(255,255,255,0.03); }
+        .signature-name { font-size: 1.6rem; font-weight: 900; letter-spacing: 8px; font-family: 'Times New Roman', serif; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .signature-sub { font-size: 0.7rem; color: var(--text-gray); margin-top: 5px; letter-spacing: 2px; }
+
+        .remove-x { color: var(--danger); margin-right: 8px; cursor: pointer; display: none; }
         .admin-mode .remove-x { display: inline; }
-        .footer-signature { margin-top: 60px; padding: 40px 0; width: 100%; text-align: center; }
-        .signature-name { font-size: 1.5rem; font-weight: 900; color: white; letter-spacing: 6px; font-family: 'Times New Roman', serif; }
-        .signature-line { width: 50px; height: 2px; background: var(--blue); margin: 12px auto; }
     </style>
 </head>
 <body>
 
-<div id="main-content" style="width: 100%;">
     <div class="top-info-bar">
         <span id="liveDate">--/--/----</span>
         <span id="liveClock" class="live-time">00:00:00</span>
@@ -73,29 +64,22 @@
     <div class="admin-controls">
         <button class="admin-btn" onclick="setCap(1)">SEAT 1</button>
         <button class="admin-btn" onclick="setCap(2)">SEAT 2</button>
-        <button class="admin-btn" style="background:var(--danger); color:white" onclick="resetLunch()">RESET LUNCH</button>
-        <label class="admin-btn" style="background:var(--green)">Upload Excel<input type="file" style="display:none" onchange="handleTaskFile(this)"></label>
-        <button class="admin-btn" onclick="document.body.classList.remove('admin-mode')">CLOSE</button>
+        <button class="admin-btn" style="background:var(--danger); color:white" onclick="resetTasksOnly()">RESET TABLE</button>
+        <label class="admin-btn" style="background:var(--green); cursor:pointer">Upload XLSX<input type="file" id="excelInput" style="display:none" onchange="handleTaskFile(this)"></label>
+        <button class="admin-btn" onclick="document.body.classList.remove('admin-mode')">EXIT ADMIN</button>
     </div>
 
-    <div id="lunchSection" class="container active">
-        <div class="emp-section"><div id="lunchEmpList" class="emp-list"></div></div>
-        <div id="lunchGrid" class="grid"></div>
-    </div>
-
-    <div id="leavesSection" class="container">
-        <div class="emp-section"><div id="leavesEmpList" class="emp-list"></div></div>
-        <div id="leavesGrid" class="grid"></div>
-    </div>
+    <div id="lunchSection" class="container active"><div id="lunchEmpList" class="emp-list-container"></div><div id="lunchGrid" class="grid"></div></div>
+    <div id="leavesSection" class="container"><div id="leavesEmpList" class="emp-list-container"></div><div id="leavesGrid" class="grid"></div></div>
 
     <div id="taskSection" class="container">
-        <div id="taskOffSection" style="margin-bottom: 20px; text-align: center; background: rgba(255, 75, 92, 0.1); padding: 15px; border-radius: 15px;">
+        <div id="taskOffSection" style="margin-bottom: 25px; width: 100%; max-width: 600px; background: rgba(255, 75, 92, 0.08); padding: 15px; border-radius: 15px; display:none; border: 1px solid rgba(255,75,92,0.2);">
             <span style="color:var(--danger); font-weight:bold;">OFF DUTY TODAY ⛔</span>
             <div id="taskOffBadges" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;"></div>
         </div>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Day/Date</th><th>Escalation</th><th>Feedback</th><th>Backup</th></tr></thead>
+                <thead><tr><th>Date</th><th>Escalation</th><th>Feedback</th><th>Backup</th></tr></thead>
                 <tbody id="taskTableBody"></tbody>
             </table>
         </div>
@@ -103,208 +87,147 @@
 
     <footer class="footer-signature">
         <div class="signature-name">SHAKIR AMMAR</div>
-        <div class="signature-line"></div>
-        <div onclick="adminMode()" style="opacity:0.02; cursor:pointer">Admin</div>
+        <div class="signature-sub">MANAGEMENT SYSTEM PRO</div>
+        <div onclick="adminMode()" style="opacity:0.02; cursor:pointer; font-size: 0.6rem; margin-top: 15px;">SYSTEM ADMIN</div>
     </footer>
-</div>
 
 <script>
-    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
-        apiKey: "AIzaSyAK7BESJWRaFk021ZNcUT2Lx4Qi2Tc0GRI",
-        authDomain: "managementsystembackoffice.firebaseapp.com",
-        databaseURL: "https://managementsystembackoffice-default-rtdb.firebaseio.com",
-        projectId: "managementsystembackoffice",
-        storageBucket: "managementsystembackoffice.firebasestorage.app",
-        messagingSenderId: "1099425828111",
-        appId: "1:1099425828111:web:44651d657afd9ba337c27a"
+      apiKey: "AIzaSyAK7BESJWRaFk021ZNcUT2Lx4Qi2Tc0GRI",
+      authDomain: "managementsystembackoffice.firebaseapp.com",
+      databaseURL: "https://managementsystembackoffice-default-rtdb.firebaseio.com",
+      projectId: "managementsystembackoffice",
+      storageBucket: "managementsystembackoffice.firebasestorage.app",
+      messagingSenderId: "1099425828111",
+      appId: "1:1099425828111:web:44651d657afd9ba337c27a"
     };
-
-    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const employees = ["Muhammad", "Riyam", "Zahraa", "Ibrahem", "Hasan", "Zaynab", "Narjes", "Sajjad", "Shakir", "Abdullah Najm", "Abdullah Al-Obaidi"];
+    const employees = ["Muhammad", "Riyam", "Zahraa", "Ibrahem", "Hasan", "Zaynab", "Narjes", "Sajjad", "Shakir", "Abid Allah Najm", "Abid Allah"];
     const lunchTimes = ["01:00", "01:30", "02:00", "02:30", "03:00", "03:20"];
-    
-    let lunchData = {};
-    let leavesData = {};
-    let taskHistory = null;
-    let maxCap = 1;
-    let selectedEmp = null;
+    let lunchData = {}, leavesData = {}, taskHistory = null, maxCap = 1, selectedEmp = null;
 
-    // الاستماع للبيانات من Firebase (تحديث حي)
-    db.ref('/').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        lunchData = data.lunchData || {};
-        leavesData = data.leavesData || {};
-        taskHistory = data.taskHistory || null;
-        maxCap = data.maxCap || 1;
-
-        // التأكد من وجود أوقات الغداء
-        lunchTimes.forEach(t => { if(!lunchData[t]) lunchData[t] = []; });
-        
-        render();
-        if(taskHistory) processTaskData(taskHistory);
+    db.ref('/').on('value', (snap) => {
+        const d = snap.val() || {};
+        lunchData = d.lunchData || {}; leavesData = d.leavesData || {}; 
+        taskHistory = d.taskHistory || null; maxCap = d.maxCap || 1;
+        render(); if(taskHistory) processTaskData(taskHistory);
     });
 
-    function saveToFirebase() {
-        db.ref('/').update({
-            lunchData: lunchData,
-            leavesData: leavesData,
-            taskHistory: taskHistory,
-            maxCap: maxCap
-        });
-    }
-
-    function checkAutoReset() {
-        const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
-        db.ref('lastResetDate').once('value', (snap) => {
-            if (now.getHours() >= 8 && snap.val() !== todayStr) {
-                lunchTimes.forEach(t => lunchData[t] = []);
-                db.ref('lastResetDate').set(todayStr);
-                saveToFirebase();
-            }
-        });
-    }
-
-    function tab(type) {
+    function tab(t) {
         selectedEmp = null;
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(l => l.className = 'nav-link');
-        document.getElementById(type + 'Section').classList.add('active');
-        document.getElementById('btn' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active-' + type);
+        document.getElementById(t+'Section').classList.add('active');
+        document.getElementById('btn'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active-'+t);
         render();
     }
 
     function render() {
         const activeContainer = document.querySelector('.container.active');
-        if(!activeContainer) return;
+        if(!activeContainer || activeContainer.id === 'taskSection') return;
         const activeTab = activeContainer.id.replace('Section', '');
-        if(activeTab === 'task') return;
-
         const listDiv = document.getElementById(activeTab + 'EmpList');
         listDiv.innerHTML = '';
-        const allLunchBooked = Object.values(lunchData).flat();
-
         employees.forEach(name => {
-            const isBooked = activeTab === 'lunch' && allLunchBooked.includes(name);
             const div = document.createElement('div');
-            div.className = `emp-item ${selectedEmp === name ? 'sel-'+activeTab : ''}`;
-            if(isBooked) div.style.opacity = "0.5";
-            div.innerText = name;
-            div.onclick = () => { selectedEmp = name; render(); };
+            div.className = 'user-badge';
+            if(selectedEmp === name) { div.style.background = activeTab==='lunch'?'var(--blue)':'var(--orange)'; div.style.color = 'black'; }
+            div.innerText = name; div.onclick = () => { selectedEmp = name; render(); };
             listDiv.appendChild(div);
         });
-
         const grid = document.getElementById(activeTab + 'Grid');
         grid.innerHTML = '';
         if(activeTab === 'lunch') {
             lunchTimes.forEach(t => {
                 const card = document.createElement('div'); card.className = 'card';
-                const users = (lunchData[t] || []).map(n => `<div class="user-badge"><span class="remove-x" onclick="cancelL('${t}','${n}')">✕</span>${n}</div>`).join('');
+                const users = (lunchData[t] || []).map(n => `<div class="user-badge" style="font-size:0.8rem; padding:4px 10px; margin:2px;"><span class="remove-x" onclick="cancelL('${t}','${n}')">✕</span>${n}</div>`).join('');
                 const left = maxCap - (lunchData[t] || []).length;
-                card.innerHTML = `<h3>${t}</h3><small>Free: ${left}</small><div style="flex:1">${users}</div>
-                <button class="btn-book lunch-btn" ${!selectedEmp || left <= 0 || allLunchBooked.includes(selectedEmp)?'disabled':''} onclick="bookL('${t}')">Book Lunch</button>`;
+                card.innerHTML = `<div><h3>${t}</h3><small style="color:var(--text-gray)">Available Seats: ${left}</small></div><div style="margin:10px 0;">${users}</div><button class="reserve-btn btn-lunch" ${!selectedEmp || left <= 0 ?'disabled':''} onclick="bookL('${t}')">RESERVE SEAT</button>`;
                 grid.appendChild(card);
             });
-        } else {
-            getDays().forEach(d => {
-                if(!leavesData[d.id]) leavesData[d.id] = [];
+        } else if(activeTab === 'leaves') {
+            getNext10Days().forEach(d => {
                 const card = document.createElement('div'); card.className = 'card';
-                const users = leavesData[d.id].map(n => `<div class="user-badge"><span class="remove-x" onclick="cancelV('${d.id}','${n}')">✕</span>${n}</div>`).join('');
-                card.innerHTML = `<h3>${d.dayNum} ${d.month}</h3><small>${d.dayName}</small><div style="flex:1">${users}</div>
-                <button class="btn-book leaves-btn" ${!selectedEmp ? 'disabled':''} onclick="bookV('${d.id}')">Book Leave</button>`;
+                const users = (leavesData[d.id] || []).map(n => `<div class="user-badge" style="font-size:0.8rem; padding:4px 10px; margin:2px;"><span class="remove-x" onclick="cancelV('${d.id}','${n}')">✕</span>${n}</div>`).join('');
+                card.innerHTML = `<div><h3>${d.dayName}</h3><small style="color:var(--orange)">${d.dateStr}</small></div><div style="margin:10px 0;">${users}</div><button class="reserve-btn btn-leaves" ${!selectedEmp ? 'disabled':''} onclick="bookV('${d.id}')">REQUEST OFF</button>`;
                 grid.appendChild(card);
             });
         }
     }
 
-    function bookL(t) { lunchData[t].push(selectedEmp); selectedEmp = null; saveToFirebase(); }
-    function cancelL(t, n) { lunchData[t] = lunchData[t].filter(x => x !== n); saveToFirebase(); }
-    function bookV(id) { if(!leavesData[id].includes(selectedEmp)){ leavesData[id].push(selectedEmp); selectedEmp = null; saveToFirebase(); }}
-    function cancelV(id, n) { leavesData[id] = leavesData[id].filter(x => x !== n); saveToFirebase(); }
-    function resetLunch() { if(confirm("Clear All?")) { lunchTimes.forEach(t => lunchData[t] = []); saveToFirebase(); }}
-    function setCap(n) { maxCap = n; saveToFirebase(); }
-    
-    function getDays() {
-        let days = [];
-        for (let i = 1; i <= 10; i++) {
-            let d = new Date(); d.setDate(d.getDate() + i);
-            days.push({ id: d.toISOString().split('T')[0], dayNum: d.getDate(), dayName: d.toLocaleDateString('en-US', { weekday: 'short' }), month: d.toLocaleDateString('en-US', { month: 'short' }) });
+    function getNext10Days() {
+        let days=[];
+        for(let i=1; i<=10; i++){
+            let d = new Date(); d.setDate(d.getDate()+i);
+            days.push({ id: d.toISOString().split('T')[0], dateStr: d.toLocaleDateString('en-GB',{day:'numeric', month:'short'}), dayName: d.toLocaleDateString('en-GB',{weekday:'long'}) });
         }
         return days;
     }
 
     function handleTaskFile(input) {
+        if(!input.files[0]) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const wb = XLSX.read(data, {type:'array', cellDates:true});
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet, { range: 1, defval: "" });
-            if(json.length > 0) {
-                taskHistory = json;
-                saveToFirebase();
-                alert("File Uploaded to Cloud!");
-            }
+            try {
+                const data = new Uint8Array(e.target.result);
+                const wb = XLSX.read(data, {type:'array', cellDates:true});
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+                let startIdx = rows.findIndex(r => r[1] && !isNaN(Date.parse(r[1])));
+                const tasks = rows.slice(startIdx).map(r => {
+                    if (!r[1] || isNaN(Date.parse(r[1]))) return null;
+                    let d = new Date(r[1]);
+                    return { 
+                        date: d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(), 
+                        off: [r[2], r[3], r[4], r[5]].filter(v => v && v !== "-" && v !== "0" && v.toString().trim() !== ""), 
+                        email: r[6] || "-", feed: r[7] || "-", back: r[8] || "-" 
+                    };
+                }).filter(x => x !== null && x.date.includes("-"));
+                db.ref('taskHistory').set(tasks).then(() => { alert("Updated Successfully!"); tab('task'); });
+            } catch (err) { alert("Error reading file!"); }
         };
         reader.readAsArrayBuffer(input.files[0]);
     }
 
     function processTaskData(data) {
         const body = document.getElementById('taskTableBody');
-        const offSection = document.getElementById('taskOffSection');
-        const offBadges = document.getElementById('taskOffBadges');
-        body.innerHTML = ''; offBadges.innerHTML = ''; offSection.style.display = 'none';
-        const today = new Date(); today.setHours(0,0,0,0);
-
-        data.forEach(row => {
-            const keys = Object.keys(row);
-            const dateKey = keys.find(k => k.toLowerCase().includes('date'));
-            if(!row[dateKey]) return;
-            let rowDate = new Date(row[dateKey]);
-            const isToday = rowDate.toDateString() === today.toDateString();
-            
-            let offs = [];
-            keys.forEach(k => { if(k.toLowerCase().includes('off')) {
-                let v = String(row[k]).trim(); if(v && v !== "-" && v !== "0") offs.push(v);
-            }});
-
-            if(isToday && offs.length > 0) {
-                offSection.style.display = 'block';
-                [...new Set(offs)].forEach(n => {
-                    const b = document.createElement('div'); b.style.cssText = "background:var(--danger); color:white; padding:5px 12px; border-radius:8px; font-weight:700; font-size:0.9rem;";
-                    b.innerText = n; offBadges.appendChild(b);
+        const offSec = document.getElementById('taskOffSection');
+        const offB = document.getElementById('taskOffBadges');
+        body.innerHTML = ''; offB.innerHTML = ''; offSec.style.display = 'none';
+        const now = new Date();
+        const todayStr = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
+        const rows = (Array.isArray(data) ? data : Object.values(data)).filter(r => r && r.date);
+        rows.forEach(row => {
+            const isToday = row.date === todayStr;
+            if(isToday && row.off && row.off.length > 0) {
+                offSec.style.display = 'block';
+                row.off.forEach(name => {
+                    const b = document.createElement('div');
+                    b.className = "user-badge"; b.style.cssText = "background:var(--danger); color:white; border:none; font-size:0.8rem; padding:5px 12px;";
+                    b.innerText = name; offB.appendChild(b);
                 });
             }
-
             const tr = document.createElement('tr');
             if(isToday) tr.className = 'today-row';
-            const esc = row[keys.find(k => k.toLowerCase().includes('email') || k.toLowerCase().includes('joget') || k.toLowerCase().includes('escalation'))] || "-";
-            const feed = row[keys.find(k => k.toLowerCase().includes('feedback'))] || "-";
-            const back = row[keys.find(k => k.toLowerCase().includes('backup'))] || "-";
-
-            tr.innerHTML = `
-                <td><b style="color:var(--text-gray)">${rowDate.toLocaleDateString('en-US',{weekday:'short'})}</b><br><small style="opacity:0.6">${rowDate.getDate()}/${rowDate.getMonth()+1}</small></td>
-                <td><span class="task-badge badge-esc">${esc}</span></td>
-                <td><span class="task-badge badge-feed">${feed}</span></td>
-                <td><span class="task-badge badge-back">${back}</span></td>
-            `;
+            const dObj = new Date(row.date);
+            tr.innerHTML = `<td><b>${dObj.toLocaleDateString('en-GB',{weekday:'short'})}</b><br><small>${dObj.getDate()}/${dObj.getMonth()+1}</small></td><td><span class="task-badge badge-esc">${row.email}</span></td><td><span class="task-badge badge-feed">${row.feed}</span></td><td><span class="task-badge badge-back">${row.back}</span></td>`;
             body.appendChild(tr);
         });
     }
 
+    function bookL(t) { let l=lunchData[t]||[]; l.push(selectedEmp); db.ref('lunchData/'+t).set(l); selectedEmp=null; }
+    function cancelL(t,n) { db.ref('lunchData/'+t).set(lunchData[t].filter(x=>x!==n)); }
+    function bookV(id) { let l=leavesData[id]||[]; if(!l.includes(selectedEmp)){l.push(selectedEmp); db.ref('leavesData/'+id).set(l); selectedEmp=null;} }
+    function cancelV(id,n) { db.ref('leavesData/'+id).set(leavesData[id].filter(x=>x!==n)); }
+    function resetTasksOnly() { if(confirm("Reset Table?")) db.ref('taskHistory').remove(); }
+    function setCap(n) { db.ref('maxCap').set(n); }
     function adminMode() { if(prompt("Password:") === "8808") document.body.classList.add('admin-mode'); }
-    
     setInterval(() => {
-        const now = new Date();
-        document.getElementById('liveClock').innerText = now.toLocaleTimeString('en-GB');
-        document.getElementById('liveDate').innerText = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
-        checkAutoReset();
+        const n = new Date();
+        document.getElementById('liveClock').innerText = n.toLocaleTimeString('en-GB');
+        document.getElementById('liveDate').innerText = n.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
     }, 1000);
-
 </script>
 </body>
 </html>
