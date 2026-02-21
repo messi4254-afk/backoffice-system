@@ -10,38 +10,66 @@
     <style>
         :root { --bg: #0f101a; --card-bg: rgba(255, 255, 255, 0.03); --blue: #00d2ff; --purple: #a29bfe; --orange: #ff9f43; --danger: #ff4b5c; --green: #55efc4; --yellow: #fff200; --text-gray: #94a3b8; }
         body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; align-items: center; }
+        
+        /* شريط المعلومات العلوي */
         .top-info-bar { width: 100%; background: rgba(255,255,255,0.02); padding: 10px 0; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; }
         .live-time { color: var(--blue); font-weight: bold; }
+
+        /* شريط التنقل */
         .nav-bar { width: 100%; background: rgba(0,0,0,0.4); padding: 15px 0; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .nav-link { padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: 800; color: var(--text-gray); transition: 0.3s; font-size: 0.85rem; }
         .nav-link.active-lunch { background: var(--blue); color: black; }
         .nav-link.active-leaves { background: var(--orange); color: black; }
         .nav-link.active-task { background: var(--purple); color: black; }
+
+        .user-badge.already-booked { opacity: 0.3; cursor: not-allowed; background: #444 !important; color: #888 !important; box-shadow: none; }
+
         .admin-controls { display: none; width: 100%; background: rgba(255, 75, 92, 0.1); padding: 12px 0; text-align: center; border-bottom: 1px solid var(--danger); }
         .admin-mode .admin-controls { display: block; }
         .admin-btn { background: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 0 5px; font-size: 0.8rem; }
+
         .container { width: 95%; max-width: 1200px; display: none; padding: 30px 0; margin: 0 auto; align-items: center; text-align: center; }
         .container.active { display: flex; flex-direction: column; }
-        .emp-list-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 35px; width: 100%; }
+
+        .emp-list-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 35px; width: 100%; }
         .user-badge { background: #fff; color: #000; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 2px solid transparent; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 100%; justify-content: center; }
-        .card { background: var(--card-bg); border-radius: 22px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; min-height: 200px; align-items: center; justify-content: space-between; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; width: 100%; justify-content: center; }
+
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; min-height: 180px; align-items: center; justify-content: space-between; transition: 0.3s; }
+        .card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
         .reserve-btn { border: none; padding: 12px 25px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: 0.3s; width: 90%; margin-top: 15px; }
         .btn-lunch { background: linear-gradient(135deg, var(--blue), #00a8cc); color: black; }
         .btn-leaves { background: linear-gradient(135deg, var(--orange), #e67e22); color: black; }
-        .table-wrapper { width: 100%; background: #161b22; border-radius: 20px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.08); }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { background: rgba(255,255,255,0.03); padding: 18px; font-size: 0.9rem; color: var(--text-gray); }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .task-badge { padding: 7px 14px; border-radius: 9px; font-weight: 700; font-size: 0.8rem; }
-        .badge-esc { background: rgba(0, 210, 255, 0.1); color: var(--blue); }
-        .badge-feed { background: rgba(162, 155, 254, 0.1); color: var(--purple); }
-        .badge-back { background: rgba(255, 242, 0, 0.1); color: var(--yellow); }
-        tr.today-row { background: rgba(85, 239, 196, 0.15) !important; border-left: 5px solid var(--green); }
 
-        /* التوقيع المعدل */
+        /* تعديلات جدول المهام (Task Table) للوضوح التام */
+        .table-wrapper { width: 100%; background: #161b22; border-radius: 20px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        
+        /* العناوين المحددة التي طلبتها */
+        th { 
+            background: rgba(255,255,255,0.05); 
+            padding: 22px 15px; 
+            font-size: 1.1rem; /* تكبير الخط */
+            font-weight: 900; /* جعل الخط عريض جداً */
+            color: #ffffff; /* لون أبيض ناصع */
+            text-transform: uppercase; 
+            letter-spacing: 2px; /* مسافات بين الحروف للوضوح */
+            border-bottom: 2px solid var(--purple); /* خط سفلي مميز تحت العناوين */
+        }
+        
+        td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 1rem; }
+        
+        .task-badge { padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; display: inline-block; }
+        .badge-esc { background: rgba(0, 210, 255, 0.15); color: var(--blue); border: 1px solid rgba(0, 210, 255, 0.3); }
+        .badge-feed { background: rgba(162, 155, 254, 0.15); color: var(--purple); border: 1px solid rgba(162, 155, 254, 0.3); }
+        .badge-back { background: rgba(255, 242, 0, 0.15); color: var(--yellow); border: 1px solid rgba(255, 242, 0, 0.3); }
+        
+        tr.today-row { background: rgba(85, 239, 196, 0.12) !important; border-right: 6px solid var(--green); }
+
         .footer-signature { margin-top: auto; padding: 60px 0; width: 100%; text-align: center; border-top: 1px solid rgba(255,255,255,0.03); }
-        .signature-name { font-size: 1.6rem; font-weight: 900; letter-spacing: 8px; font-family: 'Times New Roman', serif; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .signature-name { font-size: 1.6rem; font-weight: 900; letter-spacing: 8px; font-family: 'Times New Roman', serif; color: #fff; }
         .signature-sub { font-size: 0.7rem; color: var(--text-gray); margin-top: 5px; letter-spacing: 2px; }
 
         .remove-x { color: var(--danger); margin-right: 8px; cursor: pointer; display: none; }
@@ -71,7 +99,7 @@
 
     <div id="lunchSection" class="container active"><div id="lunchEmpList" class="emp-list-container"></div><div id="lunchGrid" class="grid"></div></div>
     <div id="leavesSection" class="container"><div id="leavesEmpList" class="emp-list-container"></div><div id="leavesGrid" class="grid"></div></div>
-
+    
     <div id="taskSection" class="container">
         <div id="taskOffSection" style="margin-bottom: 25px; width: 100%; max-width: 600px; background: rgba(255, 75, 92, 0.08); padding: 15px; border-radius: 15px; display:none; border: 1px solid rgba(255,75,92,0.2);">
             <span style="color:var(--danger); font-weight:bold;">OFF DUTY TODAY ⛔</span>
@@ -79,7 +107,14 @@
         </div>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Date</th><th>Escalation</th><th>Feedback</th><th>Backup</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Escalation</th>
+                        <th>Feedback</th>
+                        <th>Backup</th>
+                    </tr>
+                </thead>
                 <tbody id="taskTableBody"></tbody>
             </table>
         </div>
@@ -110,10 +145,26 @@
 
     db.ref('/').on('value', (snap) => {
         const d = snap.val() || {};
-        lunchData = d.lunchData || {}; leavesData = d.leavesData || {}; 
-        taskHistory = d.taskHistory || null; maxCap = d.maxCap || 1;
-        render(); if(taskHistory) processTaskData(taskHistory);
+        lunchData = d.lunchData || {}; 
+        leavesData = d.leavesData || {}; 
+        taskHistory = d.taskHistory || null; 
+        maxCap = d.maxCap || 1;
+        render(); 
+        if(taskHistory) processTaskData(taskHistory);
     });
+
+    function forceResetCheck() {
+        const now = new Date();
+        const dateKey = now.toLocaleDateString('en-CA');
+        const hour = now.getHours();
+        db.ref('lastResetDate').get().then((snapshot) => {
+            if (snapshot.val() !== dateKey && hour >= 8) {
+                db.ref('lunchData').set({});
+                db.ref('lastResetDate').set(dateKey);
+            }
+        });
+    }
+    forceResetCheck();
 
     function tab(t) {
         selectedEmp = null;
@@ -128,34 +179,77 @@
         const activeContainer = document.querySelector('.container.active');
         if(!activeContainer || activeContainer.id === 'taskSection') return;
         const activeTab = activeContainer.id.replace('Section', '');
+        
+        let bookedUsers = [];
+        if(activeTab === 'lunch') {
+            for(let time in lunchData) {
+                if(Array.isArray(lunchData[time])) bookedUsers = bookedUsers.concat(lunchData[time]);
+            }
+        }
+
         const listDiv = document.getElementById(activeTab + 'EmpList');
         listDiv.innerHTML = '';
         employees.forEach(name => {
             const div = document.createElement('div');
             div.className = 'user-badge';
-            if(selectedEmp === name) { div.style.background = activeTab==='lunch'?'var(--blue)':'var(--orange)'; div.style.color = 'black'; }
-            div.innerText = name; div.onclick = () => { selectedEmp = name; render(); };
+            if(activeTab === 'lunch' && bookedUsers.includes(name)) div.classList.add('already-booked');
+            if(selectedEmp === name) { 
+                div.style.background = activeTab==='lunch'?'var(--blue)':'var(--orange)'; 
+                div.style.color = 'black'; 
+            }
+            div.innerText = name; 
+            div.onclick = () => { 
+                if(!div.classList.contains('already-booked')) {
+                    selectedEmp = name; 
+                    render(); 
+                }
+            };
             listDiv.appendChild(div);
         });
+
         const grid = document.getElementById(activeTab + 'Grid');
         grid.innerHTML = '';
+
         if(activeTab === 'lunch') {
             lunchTimes.forEach(t => {
                 const card = document.createElement('div'); card.className = 'card';
-                const users = (lunchData[t] || []).map(n => `<div class="user-badge" style="font-size:0.8rem; padding:4px 10px; margin:2px;"><span class="remove-x" onclick="cancelL('${t}','${n}')">✕</span>${n}</div>`).join('');
-                const left = maxCap - (lunchData[t] || []).length;
-                card.innerHTML = `<div><h3>${t}</h3><small style="color:var(--text-gray)">Available Seats: ${left}</small></div><div style="margin:10px 0;">${users}</div><button class="reserve-btn btn-lunch" ${!selectedEmp || left <= 0 ?'disabled':''} onclick="bookL('${t}')">RESERVE SEAT</button>`;
+                const usersArr = Array.isArray(lunchData[t]) ? lunchData[t] : [];
+                const usersHtml = usersArr.filter(n => n).map(n => `<div class="user-badge" style="font-size:0.8rem; padding:4px 10px; margin:2px;"><span class="remove-x" onclick="cancelL('${t}','${n}')">✕</span>${n}</div>`).join('');
+                const left = maxCap - usersArr.length;
+                card.innerHTML = `<div><h3>${t}</h3><small style="color:var(--text-gray)">Available Seats: ${left}</small></div><div style="margin:10px 0; display:flex; flex-wrap:wrap; justify-content:center;">${usersHtml}</div><button class="reserve-btn btn-lunch" ${!selectedEmp || left <= 0 ?'disabled':''} onclick="bookL('${t}')">RESERVE SEAT</button>`;
                 grid.appendChild(card);
             });
         } else if(activeTab === 'leaves') {
             getNext10Days().forEach(d => {
                 const card = document.createElement('div'); card.className = 'card';
-                const users = (leavesData[d.id] || []).map(n => `<div class="user-badge" style="font-size:0.8rem; padding:4px 10px; margin:2px;"><span class="remove-x" onclick="cancelV('${d.id}','${n}')">✕</span>${n}</div>`).join('');
-                card.innerHTML = `<div><h3>${d.dayName}</h3><small style="color:var(--orange)">${d.dateStr}</small></div><div style="margin:10px 0;">${users}</div><button class="reserve-btn btn-leaves" ${!selectedEmp ? 'disabled':''} onclick="bookV('${d.id}')">REQUEST OFF</button>`;
+                const usersArr = Array.isArray(leavesData[d.id]) ? leavesData[d.id] : [];
+                const usersHtml = usersArr.filter(n => n).map(n => `<div class="user-badge" style="font-size:0.85rem; padding:6px 12px; margin:3px;"><span class="remove-x" onclick="cancelV('${d.id}','${n}')">✕</span>${n}</div>`).join('');
+                card.innerHTML = `<div><h3 style="margin:0">${d.dayName}</h3><small style="color:var(--orange); font-weight:bold;">${d.dateStr}</small></div><div style="margin:15px 0; display:flex; flex-wrap:wrap; justify-content:center;">${usersHtml}</div><button class="reserve-btn btn-leaves" ${!selectedEmp ? 'disabled':''} onclick="bookV('${d.id}')">REQUEST OFF</button>`;
                 grid.appendChild(card);
             });
         }
     }
+
+    function bookL(t) {
+        if(!selectedEmp) return;
+        let l = Array.isArray(lunchData[t]) ? lunchData[t] : [];
+        l.push(selectedEmp);
+        db.ref('lunchData/'+t).set(l);
+        selectedEmp = null;
+    }
+
+    function bookV(id) {
+        if(!selectedEmp) return;
+        let l = Array.isArray(leavesData[id]) ? leavesData[id] : [];
+        if(!l.includes(selectedEmp)) {
+            l.push(selectedEmp);
+            db.ref('leavesData/'+id).set(l);
+        }
+        selectedEmp = null;
+    }
+
+    function cancelL(t,n) { if(Array.isArray(lunchData[t])) db.ref('lunchData/'+t).set(lunchData[t].filter(x=>x!==n)); }
+    function cancelV(id,n) { if(Array.isArray(leavesData[id])) db.ref('leavesData/'+id).set(leavesData[id].filter(x=>x!==n)); }
 
     function getNext10Days() {
         let days=[];
@@ -195,8 +289,7 @@
         const offSec = document.getElementById('taskOffSection');
         const offB = document.getElementById('taskOffBadges');
         body.innerHTML = ''; offB.innerHTML = ''; offSec.style.display = 'none';
-        const now = new Date();
-        const todayStr = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
+        const todayStr = new Date().getFullYear() + "-" + (new Date().getMonth()+1) + "-" + new Date().getDate();
         const rows = (Array.isArray(data) ? data : Object.values(data)).filter(r => r && r.date);
         rows.forEach(row => {
             const isToday = row.date === todayStr;
@@ -216,13 +309,10 @@
         });
     }
 
-    function bookL(t) { let l=lunchData[t]||[]; l.push(selectedEmp); db.ref('lunchData/'+t).set(l); selectedEmp=null; }
-    function cancelL(t,n) { db.ref('lunchData/'+t).set(lunchData[t].filter(x=>x!==n)); }
-    function bookV(id) { let l=leavesData[id]||[]; if(!l.includes(selectedEmp)){l.push(selectedEmp); db.ref('leavesData/'+id).set(l); selectedEmp=null;} }
-    function cancelV(id,n) { db.ref('leavesData/'+id).set(leavesData[id].filter(x=>x!==n)); }
     function resetTasksOnly() { if(confirm("Reset Table?")) db.ref('taskHistory').remove(); }
     function setCap(n) { db.ref('maxCap').set(n); }
     function adminMode() { if(prompt("Password:") === "8808") document.body.classList.add('admin-mode'); }
+    
     setInterval(() => {
         const n = new Date();
         document.getElementById('liveClock').innerText = n.toLocaleTimeString('en-GB');
